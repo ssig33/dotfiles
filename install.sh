@@ -27,6 +27,7 @@ chsh -s /bin/zsh
 cp ~/dotfiles/zshrc ~/.zshrc
 cp ~/dotfiles/tigrc ~/.tigrc
 cp ~/dotfiles/zimrc ~/.zimrc
+cp ~/dotfiles/bashrc ~/.bashrc
 
 sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen
 locale-gen
@@ -35,3 +36,5 @@ update-locale LANG=ja_JP.UTF-8
 mkdir -p ~/.cache/zim
 rm -rf ~/.cache/zim
 
+git clone --depth=1 https://github.com/Bash-it/bash-it.git ~/.bash_it
+bash ~/.bash_it/install.sh --silent
