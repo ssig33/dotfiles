@@ -20,7 +20,7 @@ if [ -z "`which apt-get`" ]; then
 fi
 
 apt-get update
-apt-get install -y tig zsh locales
+apt-get install -y tig locales
 
 chsh -s /bin/zsh
 
