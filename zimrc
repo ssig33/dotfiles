@@ -1,0 +1,5 @@
+zmodule environment
+zmodule zsh-users/zsh-completions --fpath src
+zmodule git-info
+zmodule prompt-pwd
+zmodule eriner
