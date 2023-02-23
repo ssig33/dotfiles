@@ -28,6 +28,10 @@ cp ~/dotfiles/zshrc ~/.zshrc
 cp ~/dotfiles/tigrc ~/.tigrc
 cp ~/dotfiles/zimrc ~/.zimrc
 
+sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen
+locale-gen
+update-locale LANG=ja_JP.UTF-8
+
 mkdir -p ~/.cache/zim
 rm -rf ~/.cache/zim
 
