@@ -40,3 +40,6 @@ git clone --depth=1 https://github.com/Bash-it/bash-it.git ~/.bash_it
 bash ~/.bash_it/install.sh --silent
 
 cat ~/dotfiles/bashrc >> ~/.bashrc
+
+# replace bobby theme with powerline
+sed -i -E 's/^\s*export BASH_IT_THEME=.*/export BASH_IT_THEME="powerline"/' ~/.bashrc
