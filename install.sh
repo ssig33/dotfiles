@@ -22,8 +22,6 @@ fi
 apt-get update
 apt-get install -y tig locales
 
-chsh -s /bin/zsh
-
 cp ~/dotfiles/zshrc ~/.zshrc
 cp ~/dotfiles/tigrc ~/.tigrc
 cp ~/dotfiles/zimrc ~/.zimrc
