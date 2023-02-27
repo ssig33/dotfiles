@@ -6,9 +6,9 @@ if [ `id -u` -ne 0 ]; then
     exit 1
 fi
 
-# exit unless on REMOTE_CONTAINERS
-if [ -z "$REMOTE_CONTAINERS" ]; then
-    echo "You must be on a REMOTE_CONTAINERS to run this script."
+# exit unless on REMOTE_CONTAINERS or CODESPACES
+if [ -z "$CODESPACES" ] && [ -z "$REMOTE_CONTAINERS" ]; then
+    echo "You must be on a REMOTE_CONTAINERS or CODESPACES to run this script."
     exit 1
 fi
 
