@@ -22,9 +22,9 @@ fi
 apt-get update
 apt-get install -y tig locales
 
-cp ~/dotfiles/zshrc ~/.zshrc
-cp ~/dotfiles/tigrc ~/.tigrc
-cp ~/dotfiles/zimrc ~/.zimrc
+cp ./zshrc ~/.zshrc
+cp ./tigrc ~/.tigrc
+cp ./zimrc ~/.zimrc
 
 sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen
 sed -i -E 's/# (en_US.UTF-8)/\1/' /etc/locale.gen
@@ -37,7 +37,7 @@ rm -rf ~/.cache/zim
 git clone --depth=1 https://github.com/Bash-it/bash-it.git ~/.bash_it
 bash ~/.bash_it/install.sh --silent
 
-cat ~/dotfiles/bashrc >> ~/.bashrc
+cat ./bashrc >> ~/.bashrc
 
 # replace bobby theme with powerline
 sed -i -E 's/^\s*export BASH_IT_THEME=.*/export BASH_IT_THEME="powerline"/' ~/.bashrc
