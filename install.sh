@@ -20,7 +20,7 @@ if [ -z "`which apt-get`" ]; then
 fi
 
 apt-get update
-apt-get install -y tig locales
+apt-get install -y tig locales bash-completion
 
 cp ./zshrc ~/.zshrc
 cp ./tigrc ~/.tigrc
