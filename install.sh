@@ -35,7 +35,7 @@ mkdir -p ~/.cache/zim
 rm -rf ~/.cache/zim
 
 git clone --depth=1 https://github.com/Bash-it/bash-it.git ~/.bash_it
-bash ~/.bash_it/install.sh --silent
+bash ~/.bash_it/install.sh --silent -f
 
 cat ./bashrc >> ~/.bashrc
 
