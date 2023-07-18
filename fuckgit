@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+begin
+  require 'thor'
+  require 'http'
+  require 'open3'
+  require 'json'
+rescue LoadError
+  system 'gem install thor http'
+  Gem.clear_paths
+  retry
+end
+
+# fuckgit
+class GitHelper < Thor
+  default_command :fuckgit
+
+  no_commands do
+    def current_branch
+      `git rev-parse --abbrev-ref HEAD`.strip
+    end
+
+    def generate_commit_message
+      changed_files = `git diff --name-only HEAD`.split("\n")
+      return '' if changed_files.count.zero?
+
+      if changed_files.size <= 2
+        "update #{changed_files.join(', ')}"
+      else
+        "update\n\n#{changed_files.join("\n")}"
+      end
+    end
+
+    def use_ai_commit
+      system 'npm i -g git-aicommit' unless system 'which git-aicommit'
+
+      system 'git-aicommit'
+    end
+
+    def git_actions(commit_message)
+      branch = current_branch
+      system('git add -A')
+      ai_commit = !ENV['OPENAI_API_KEY'].nil?
+      ai_commit ? use_ai_commit : system("git commit -m '#{commit_message}'")
+      system("git pull origin #{branch} --no-edit")
+      system("git push origin #{branch}")
+    end
+  end
+
+  desc 'fuckgit', 'make fuck commit'
+  def fuckgit
+    unless options[:force]
+      branch = current_branch
+      unless %w[main master].include? branch
+        puts "Current branch is #{branch}, not main or master. Exiting..."
+        exit
+      end
+    end
+
+    commit_message = generate_commit_message
+    git_actions(commit_message)
+  end
+end
+
+GitHelper.start(ARGV)

@@ -22,9 +22,22 @@ fi
 apt-get update
 apt-get install -y tig locales bash-completion
 
+# if node is not installed, install it
+if [ -z "`which node`" ]; then
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    apt-get install -y nodejs
+fi
+
+# if ruby is not installed, install it
+if [ -z "`which ruby`" ]; then
+    apt-get install -y ruby
+fi
+
+
 cp ./zshrc ~/.zshrc
 cp ./tigrc ~/.tigrc
 cp ./zimrc ~/.zimrc
+cp fuckgit /usr/local/bin
 
 sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen
 sed -i -E 's/# (en_US.UTF-8)/\1/' /etc/locale.gen
