@@ -50,14 +50,6 @@ class GitHelper < Thor
 
   desc 'fuckgit', 'make fuck commit'
   def fuckgit
-    unless options[:force]
-      branch = current_branch
-      unless %w[main master].include? branch
-        puts "Current branch is #{branch}, not main or master. Exiting..."
-        exit
-      end
-    end
-
     commit_message = generate_commit_message
     git_actions(commit_message)
   end
