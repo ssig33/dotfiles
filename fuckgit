@@ -16,6 +16,16 @@ end
 class GitHelper < Thor
   default_command :fuckgit
 
+  EXCLUDE = [
+    '*.lock', '*.lockb', '*-lock.json', '*-lock.yaml', 'Gemfile.lock'
+  ].freeze
+
+  # rubocop:disable Layout/LineLength
+  QUESTION = 'Read the following git diff for a multiple files and write headline of commit and bullet points simple commit message in englisht without mentioning lines or files. Explain why these changes were made (summarize the reasoning):'
+  SYSTEM = 'You are expert AI, your job is to write clear and concise Git commit messages. Your responsibility is to ensure that these messages accurately describe the changes made in each commit, follow established guidelines. Provide a clear history of changes to the codebase. Write 1-2 sentences. Output only the commit message without comments or other text.'
+  # rubocop:enable Layout/LineLength
+
+  # rubocop:disable Metrics/BlockLength
   no_commands do
     def current_branch
       `git rev-parse --abbrev-ref HEAD`.strip
@@ -39,32 +49,17 @@ class GitHelper < Thor
     end
 
     def use_ai_commit
-      exclude = [
-        '*.lock', '*.lockb', '*-lock.json', '*-lock.yaml', 'Gemfile.lock'
-      ]
-      diff = `git diff --staged --no-ext-diff --diff-filter=ACMRTUXB -- #{exclude.map do
-                                                                            "':(exclude)#{_1}'"
-                                                                          end.join(' ')}`
+      cmd_base = 'git diff --staged --no-ext-diff --diff-filter=ACMRTUXB'
+      diff = `#{cmd_base} -- #{EXCLUDE.map { "':(exclude)#{_1}'" }.join(' ')}`
 
-      prompt = <<~EOS
-        Read the following git diff for a multiple files and write headline of commit and bullet points simple commit message in englisht without mentioning lines or files. Explain why these changes were made (summarize the reasoning):
+      prompt = "#{QUESTION}\n\n#{diff}"
 
-        #{diff}
-      EOS
+      messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }]
 
-      messages = [
-        { role: 'system',
-          content: 'You are expert AI, your job is to write clear and concise Git commit messages. Your responsibility is to ensure that these messages accurately describe the changes made in each commit, follow established guidelines. Provide a clear history of changes to the codebase. Write 1-2 sentences. Output only the commit message without comments or other text. ' }, { role: 'user', content: prompt }
-      ]
+      payload = { messages: messages, max_tokens: 2048, model: 'gpt-3.5-turbo-16k-0613', temperature: 0 }
+      auth = "Bearer #{ENV.fetch('OPENAI_API_KEY', nil)}"
 
-      res = HTTP.auth("Bearer #{ENV.fetch('OPENAI_API_KEY', nil)}").post('https://api.openai.com/v1/chat/completions',
-                                                                         json: {
-                                                                           messages: messages,
-                                                                           max_tokens: 2048,
-                                                                           model: 'gpt-3.5-turbo-16k-0613',
-                                                                           temperature: 0
-                                                                         })
-
+      res = HTTP.auth(auth).post('https://api.openai.com/v1/chat/completions', json: payload)
       msg = JSON.parse(res.body.to_s)['choices'][0]['message']['content']
 
       system("git commit -m '#{msg}'")
@@ -80,6 +75,7 @@ class GitHelper < Thor
       system("git push origin #{branch}")
     end
   end
+  # rubocop:enable Metrics/BlockLength
 
   desc 'fuckgit', 'make fuck commit'
   def fuckgit
