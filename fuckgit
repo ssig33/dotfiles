@@ -66,21 +66,23 @@ class GitHelper < Thor
       system('git commit --amend -v')
     end
 
-    def git_actions(commit_message)
+    def git_actions(commit_message, no_push: false)
       branch = current_branch
       system('git add -A')
       ai_commit = !ENV['OPENAI_API_KEY'].nil?
       ai_commit ? use_ai_commit : system("git commit -m '#{commit_message}'")
       system("git pull origin #{branch} --no-edit")
-      system("git push origin #{branch}")
+      system("git push origin #{branch}") unless no_push
     end
   end
   # rubocop:enable Metrics/BlockLength
 
   desc 'fuckgit', 'make fuck commit'
+  option :push, type: :boolean
+  long_desc '--no-push を指定すると、 push しません'
   def fuckgit
     commit_message = generate_commit_message
-    git_actions(commit_message)
+    git_actions(commit_message, no_push: !options[:push])
   end
 end
 
