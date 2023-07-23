@@ -68,6 +68,7 @@ class GitHelper < Thor
       msg = JSON.parse(res.body.to_s)['choices'][0]['message']['content']
 
       system("git commit -m '#{msg}'")
+      system("git commit --amend -v")
     end
 
 
