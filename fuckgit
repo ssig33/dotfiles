@@ -57,20 +57,19 @@ class GitHelper < Thor
           content: 'You are expert AI, your job is to write clear and concise Git commit messages. Your responsibility is to ensure that these messages accurately describe the changes made in each commit, follow established guidelines. Provide a clear history of changes to the codebase. Write 1-2 sentences. Output only the commit message without comments or other text. ' }, { role: 'user', content: prompt }
       ]
 
-      res = HTTP.auth("Bearer #{ENV['OPENAI_API_KEY']}").post('https://api.openai.com/v1/chat/completions',
-                                                        json: {
-                                                          messages:,
-                                                          max_tokens: 2048,
-                                                          model: 'gpt-3.5-turbo-16k-0613',
-                                                          temperature: 0
-                                                        })
+      res = HTTP.auth("Bearer #{ENV.fetch('OPENAI_API_KEY', nil)}").post('https://api.openai.com/v1/chat/completions',
+                                                                         json: {
+                                                                           messages: messages,
+                                                                           max_tokens: 2048,
+                                                                           model: 'gpt-3.5-turbo-16k-0613',
+                                                                           temperature: 0
+                                                                         })
 
       msg = JSON.parse(res.body.to_s)['choices'][0]['message']['content']
 
       system("git commit -m '#{msg}'")
-      system("git commit --amend -v")
+      system('git commit --amend -v')
     end
-
 
     def git_actions(commit_message)
       branch = current_branch
