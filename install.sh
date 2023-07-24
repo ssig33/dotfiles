@@ -30,7 +30,7 @@ fi
 
 # if ruby is not installed, install it
 if [ -z "`which ruby`" ]; then
-    apt-get install -y ruby
+    apt-get install -y ruby ruby-dev
 fi
 
 
