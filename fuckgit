@@ -71,8 +71,10 @@ class GitHelper < Thor
       system('git add -A')
       ai_commit = !ENV['OPENAI_API_KEY'].nil?
       ai_commit ? use_ai_commit : system("git commit -m '#{commit_message}'")
+      return if no_push
+
       system("git pull origin #{branch} --no-edit")
-      system("git push origin #{branch}") unless no_push
+      system("git push origin #{branch}")
     end
   end
   # rubocop:enable Metrics/BlockLength
