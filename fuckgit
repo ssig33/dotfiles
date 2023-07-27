@@ -81,7 +81,7 @@ class GitHelper < Thor
 
   desc 'fuckgit', 'make fuck commit'
   option :push, type: :boolean
-  long_desc '--no-push を指定すると、 push しません'
+  long_desc "--push を指定すると push します"
   def fuckgit
     commit_message = generate_commit_message
     git_actions(commit_message, no_push: !options[:push])
