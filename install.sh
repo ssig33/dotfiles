@@ -20,9 +20,9 @@ fi
 
 # install packages
 if [ "$(id -u)" -eq 0 ]; then
-    bash apt.sh
+    bash ~/dotfiles/apt.sh
 else
-    sudo bash apt.sh
+    sudo bash ~/dotfiles/apt.sh
 fi
 
 cp ./zshrc ~/.zshrc
