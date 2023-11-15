@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# exit unless we're running as root
-if [ `id -u` -ne 0 ]; then
-    echo "You must be root to run this script."
-    exit 1
-fi
-
 # exit unless on REMOTE_CONTAINERS or CODESPACES
 if [ -z "$CODESPACES" ] && [ -z "$REMOTE_CONTAINERS" ]; then
     echo "You must be on a REMOTE_CONTAINERS or CODESPACES to run this script."
@@ -19,18 +13,24 @@ if [ -z "`which apt-get`" ]; then
     exit 1
 fi
 
-apt-get update
-apt-get install -y tig locales bash-completion
+# use sudo if not root
+if [ "$EUID" -ne 0 ]; then
+    SUDO=sudo
+fi
+
+# install packages
+$SUDO apt update
+$SUDO apt install -y tig locales bash-completion curl
 
 # if node is not installed, install it
 if [ -z "`which node`" ]; then
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt-get install -y nodejs
+    $SUDO apt-get install -y nodejs
 fi
 
 # if ruby is not installed, install it
 if [ -z "`which ruby`" ]; then
-    apt-get install -y ruby ruby-dev
+    $SUDO apt-get install -y ruby ruby-dev
 fi
 
 

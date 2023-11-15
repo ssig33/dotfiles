@@ -6,6 +6,7 @@ begin
   require 'http'
   require 'open3'
   require 'json'
+  require 'tempfile'
 rescue LoadError
   system 'gem install thor http'
   Gem.clear_paths
@@ -21,8 +22,15 @@ class GitHelper < Thor
   ].freeze
 
   # rubocop:disable Layout/LineLength
-  QUESTION = 'Read the following git diff for a multiple files and write headline of commit and bullet points simple commit message in englisht without mentioning lines or files. Explain why these changes were made (summarize the reasoning):'
-  SYSTEM = 'You are expert AI, your job is to write clear and concise Git commit messages. Your responsibility is to ensure that these messages accurately describe the changes made in each commit, follow established guidelines. Provide a clear history of changes to the codebase. Write 1-2 sentences. Output only the commit message without comments or other text.'
+  SYSTEM = <<~EOS
+    以下にわたされる git diff の結果からコミットメッセージを作ってください。コミットメッセージは以下の内容を含むべきです。 1. 変更から想像される変更の目的、主題(これは変更内容を要約したものではなく、その主題であるべきです、とくによくないのは変更点をただ列挙したようなものです、あくまで主題、意図を推定して力強い一文にしてください) 2. 具体的な変更のうち重要度が高いものを要点にまとめた箇条書き(ここではインデントの変更、変数名の小さな変更など軽微な変更は省略されているほうが望ましいです)。そしてコミットメッセージは以下のようなフォーマットで提供されるべきです。また、コミットメッセージはかならず日本語で生成するようにしてください。
+
+    {変更の目的、主題(ここには内容のみを記載してください)}
+
+    - {変更の要点}
+    - {変更の要点}
+    ...
+  EOS
   # rubocop:enable Layout/LineLength
 
   # rubocop:disable Metrics/BlockLength
@@ -43,27 +51,24 @@ class GitHelper < Thor
     end
 
     def use_ai_commit
-      system 'npm i -g git-aicommit' unless system 'which git-aicommit'
-
-      system 'git-aicommit'
-    end
-
-    def use_ai_commit
       cmd_base = 'git diff --staged --no-ext-diff --diff-filter=ACMRTUXB'
       diff = `#{cmd_base} -- #{EXCLUDE.map { "':(exclude)#{_1}'" }.join(' ')}`
 
-      prompt = "#{QUESTION}\n\n#{diff}"
+      prompt = "#{diff}"
 
       messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }]
 
-      payload = { messages: messages, max_tokens: 2048, model: 'gpt-3.5-turbo-16k-0613', temperature: 0 }
+      payload = { messages: messages, max_tokens: 2048, model: 'gpt-4-1106-preview', temperature: 0 }
       auth = "Bearer #{ENV.fetch('OPENAI_API_KEY', nil)}"
 
       res = HTTP.auth(auth).post('https://api.openai.com/v1/chat/completions', json: payload)
       msg = JSON.parse(res.body.to_s)['choices'][0]['message']['content']
 
-      system("git commit -m '#{msg}'")
-      system('git commit --amend -v')
+      Tempfile.create do |f|
+        File.open(f.path, 'w') {|t| t.puts msg }
+        system "$EDITOR #{f.path}"
+        system("git commit -F #{f.path}")
+      end
     end
 
     def git_actions(commit_message, no_push: false)
