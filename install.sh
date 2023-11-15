@@ -22,7 +22,7 @@ fi
 if [ "$(id -u)" -eq 0 ]; then
     bash apt.sh
 else
-    sudo bash apt.s
+    sudo bash apt.sh
 fi
 
 cp ./zshrc ~/.zshrc
