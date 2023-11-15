@@ -13,11 +13,6 @@ if [ -z "`which apt-get`" ]; then
     exit 1
 fi
 
-# use sudo if not root
-if [ "$EUID" -ne 0 ]; then
-    SUDO=sudo
-fi
-
 # install packages
 if [ "$(id -u)" -eq 0 ]; then
     bash ~/dotfiles/apt.sh
