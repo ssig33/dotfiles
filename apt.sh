@@ -16,4 +16,7 @@ if [ -z "`which ruby`" ]; then
     apt-get install -y ruby ruby-dev
 fi
 
-
+sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen
+sed -i -E 's/# (en_US.UTF-8)/\1/' /etc/locale.gen
+locale-gen
+update-locale LANG=ja_JP.UTF-8

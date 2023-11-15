@@ -30,11 +30,6 @@ cp ./tigrc ~/.tigrc
 cp ./zimrc ~/.zimrc
 cp fuckgit /usr/local/bin
 
-sed -i -E 's/# (ja_JP.UTF-8)/\1/' /etc/locale.gen
-sed -i -E 's/# (en_US.UTF-8)/\1/' /etc/locale.gen
-locale-gen
-update-locale LANG=ja_JP.UTF-8
-
 mkdir -p ~/.cache/zim
 rm -rf ~/.cache/zim
 
