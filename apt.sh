@@ -5,7 +5,7 @@ apt install -y tig locales bash-completion curl
 if [ -z "`which node`" ]; then
     apt-get update && sudo apt-get install -y ca-certificates curl gnupg
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-    NODE_MAJOR=18
+    NODE_MAJOR=20
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
     apt-get update
     apt-get install -y nodejs
