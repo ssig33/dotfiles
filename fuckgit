@@ -18,7 +18,7 @@ class GitHelper < Thor
   default_command :fuckgit
 
   EXCLUDE = [
-    '*.lock', '*.lockb', '*-lock.json', '*-lock.yaml', 'Gemfile.lock'
+    '*.lock', '*.lockb', '*-lock.json', '*-lock.yaml'
   ].freeze
 
   # rubocop:disable Layout/LineLength
@@ -50,15 +50,17 @@ class GitHelper < Thor
       end
     end
 
-    def use_ai_commit
+    def use_ai_commit(en=false)
       cmd_base = 'git diff --staged --no-ext-diff --diff-filter=ACMRTUXB'
       diff = `#{cmd_base} -- #{EXCLUDE.map { "':(exclude)#{_1}'" }.join(' ')}`
 
       prompt = "#{diff}"
 
-      messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }]
+      system_prompt = en ? SYSTEM.gsub("日本語", "English") : SYSTEM
 
-      payload = { messages: messages, max_tokens: 2048, model: 'gpt-4-1106-preview', temperature: 0 }
+      messages = [{ role: 'system', content: system_prompt }, { role: 'user', content: prompt }]
+
+      payload = { messages: messages, max_tokens: 2048, model: 'gpt-4o', temperature: 0 }
       auth = "Bearer #{ENV.fetch('OPENAI_API_KEY', nil)}"
 
       res = HTTP.auth(auth).post('https://api.openai.com/v1/chat/completions', json: payload)
@@ -71,25 +73,27 @@ class GitHelper < Thor
       end
     end
 
-    def git_actions(commit_message, no_push: false)
+    def git_actions(commit_message, no_push: false, en: false)
       branch = current_branch
       system('git add -A')
       ai_commit = !ENV['OPENAI_API_KEY'].nil?
-      ai_commit ? use_ai_commit : system("git commit -m '#{commit_message}'")
+      ai_commit ? use_ai_commit(en) : system("git commit -m '#{commit_message}'")
       return if no_push
 
       system("git pull origin #{branch} --no-edit")
       system("git push origin #{branch}")
+      system("pr")
     end
   end
   # rubocop:enable Metrics/BlockLength
 
   desc 'fuckgit', 'make fuck commit'
   option :push, type: :boolean
-  long_desc "--push を指定すると push します"
+  option :en, type: :boolean
+  long_desc "--push を指定すると push します, --en を指定すると英語になります。"
   def fuckgit
     commit_message = generate_commit_message
-    git_actions(commit_message, no_push: !options[:push])
+    git_actions(commit_message, no_push: !options[:push], en: !!options[:en])
   end
 end
 
